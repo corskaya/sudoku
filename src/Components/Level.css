@@ -7,31 +7,35 @@
 }
 
 .btnInitialLight {
+    display: flex;
+    justify-content: center;
+    align-items: center;
     height: 40px;
     background-color: white;
     border: 1px solid #5f5f5f;
 }
 
 .btnInitialDark {
+    display: flex;
+    justify-content: center;
+    align-items: center;
     height: 40px;
     background-color: #e9e9ed;
     border: 1px solid #5f5f5f;
 }
 
-.currentBtnLight {
+.currentBtn {
     display: flex;
     justify-content: center;
     align-items: center;
     height: 40px;
-    background-color: white;
     border: 3px solid blue;
 }
 
-.currentBtnDark {
+.wrongCell {
     display: flex;
     justify-content: center;
     align-items: center;
     height: 40px;
-    background-color: #e9e9ed;
-    border: 3px solid blue;
+    background-color: var(--wrong-color);
 }
