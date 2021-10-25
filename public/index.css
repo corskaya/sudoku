@@ -1,8 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto+Slab&display=swap');
 
 :root {
-	--dark-color-a: #d332bd;
-	--dark-color-b: #e69ade;
+	--dark-color-a: #303030;
+	--dark-color-b: rgb(202, 202, 202);
 	--light-color: #fcebfa;
     --correct-color: #5cb85c;
     --wrong-color: #dd3e4e;

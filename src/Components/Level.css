@@ -3,25 +3,33 @@
     margin: 0 auto;
     display: grid;
     grid-template-columns: repeat(9, minmax(0, 1fr));
-    border: 1px solid #5f5f5f;
+    border: 3px solid var(--dark-color-a);
 }
 
-.btnInitialLight {
+.btnInitial {
     display: flex;
     justify-content: center;
     align-items: center;
     height: 40px;
     background-color: white;
-    border: 1px solid #5f5f5f;
+    border: 0.01em solid var(--dark-color-a);
+    border-width: 0.01em;
 }
 
-.btnInitialDark {
+.btnInitial:nth-child(3n) {border-right: 3px solid var(--dark-color-a);}
+.btnInitial:nth-child(9n) {border-right: 1px solid var(--dark-color-a);}
+.btnInitial:nth-child(n + 19) {border-bottom: 3px solid var(--dark-color-a);}
+.btnInitial:nth-child(n + 28) {border-bottom: 1px solid var(--dark-color-a);}
+.btnInitial:nth-child(n + 46) {border-bottom: 3px solid var(--dark-color-a);}
+.btnInitial:nth-child(n + 55) {border-bottom: 1px solid var(--dark-color-a);}
+
+
+.checkCell {
     display: flex;
     justify-content: center;
     align-items: center;
     height: 40px;
-    background-color: #e9e9ed;
-    border: 1px solid #5f5f5f;
+    background-color: #e0eaf4;
 }
 
 .currentBtn {
@@ -29,7 +37,15 @@
     justify-content: center;
     align-items: center;
     height: 40px;
-    border: 3px solid blue;
+    background-color: #fff6b3;
+}
+
+.sameValue {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 40px;
+    background-color: #9de6fe;
 }
 
 .wrongCell {
