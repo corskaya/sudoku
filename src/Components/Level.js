@@ -1,6 +1,7 @@
 import React from "react";
 import "./Level.css";
-import OuterButton from "./OuterButton"
+import OuterButton from "./OuterButton";
+import InnerButtons from "./InnerButtons";
 
 class Level extends React.Component {
 
@@ -44,11 +45,21 @@ class Level extends React.Component {
     }
   }
 
+  checkWrongCells = (col, row) => {
+    if (this.props.wrongCells.length > 0) {
+      for (let i = 0; i < this.props.wrongCells.length; i++) {
+        if (this.props.wrongCells[i] === (col * 9) + row + 1) {
+          return "wrongCell"
+        }
+      }
+    }
+  }
+
   checkWrongRowCells = (col, row) => {
     if (this.props.wrongRowCells.length > 0) {
       for (let i = 0; i < this.props.wrongRowCells.length; i++) {
         if (this.props.wrongRowCells[i] === (col * 9) + row + 1) {
-          return "wrongCell"
+          return "wrongCellBg"
         }
       }
     }
@@ -58,7 +69,7 @@ class Level extends React.Component {
     if (this.props.wrongColCells.length > 0) {
       for (let i = 0; i < this.props.wrongColCells.length; i++) {
         if (this.props.wrongColCells[i] === (col * 9) + row + 1) {
-          return "wrongCell"
+          return "wrongCellBg"
         }
       }
     }
@@ -68,7 +79,17 @@ class Level extends React.Component {
     if (this.props.wrongBoxCells.length > 0) {
       for (let i = 0; i < this.props.wrongBoxCells.length; i++) {
         if (this.props.wrongBoxCells[i] === (col * 9) + row + 1) {
-          return "wrongCell"
+          return "wrongCellBg"
+        }
+      }
+    }
+  }
+
+  checkCorrectCells = (col, row) => {
+    if (this.props.correctCells.length > 0) {
+      for (let i = 0; i < this.props.correctCells.length; i++) {
+        if (this.props.correctCells[i] === (col * 9) + row + 1) {
+          return "correctCell"
         }
       }
     }
@@ -89,22 +110,43 @@ class Level extends React.Component {
           return (
             valueRow.map((valueCol, indexRow) => {
               return (
-                <OuterButton
-                  className=
-                  {`${this.checkCurrentCell(indexCol, indexRow)}
+                valueCol === 0 ?
+                  <InnerButtons
+                    className=
+                    {`${this.checkCurrentCell(indexCol, indexRow)}
                     ${this.checkEmptyClickRowCells(indexCol, indexRow)}
                     ${this.checkEmptyClickColCells(indexCol, indexRow)}
                     ${this.checkEmptyClickBoxCells(indexCol, indexRow)}
                     ${this.checkLoadClickCells(indexCol, indexRow)}
+                    ${this.checkWrongCells(indexCol, indexRow)}
                     ${this.checkWrongRowCells(indexCol, indexRow)}
                     ${this.checkWrongColCells(indexCol, indexRow)}
                     ${this.checkWrongBoxCells(indexCol, indexRow)}
+                    ${this.checkCorrectCells(indexCol, indexRow)}
                   `}
-                  key={(indexCol * 9) + indexRow + 1}
-                  index={(indexCol * 9) + indexRow + 1}
-                  onClick={this.props.onCellClick}
-                  value={valueCol === 0 ? null : valueCol}
-                />
+                    key={(indexCol * 9) + indexRow + 1}
+                    index={(indexCol * 9) + indexRow + 1}
+                    onCellClick={this.props.onCellClick}
+                    pencilNumbers={this.props.pencilNumbers}
+                    /> :
+                  <OuterButton
+                    className=
+                    {`${this.checkCurrentCell(indexCol, indexRow)}
+                    ${this.checkEmptyClickRowCells(indexCol, indexRow)}
+                    ${this.checkEmptyClickColCells(indexCol, indexRow)}
+                    ${this.checkEmptyClickBoxCells(indexCol, indexRow)}
+                    ${this.checkLoadClickCells(indexCol, indexRow)}
+                    ${this.checkWrongCells(indexCol, indexRow)}
+                    ${this.checkWrongRowCells(indexCol, indexRow)}
+                    ${this.checkWrongColCells(indexCol, indexRow)}
+                    ${this.checkWrongBoxCells(indexCol, indexRow)}
+                    ${this.checkCorrectCells(indexCol, indexRow)}
+                  `}
+                    key={(indexCol * 9) + indexRow + 1}
+                    index={(indexCol * 9) + indexRow + 1}
+                    onCellClick={this.props.onCellClick}
+                    value={valueCol}
+                  />
               );
             })
           );

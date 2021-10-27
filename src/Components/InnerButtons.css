@@ -1,0 +1,20 @@
+.btnInner {
+    width: 100%;
+    height: 45px;
+    border: 1px solid var(--dark-color-a);
+}
+
+.smallNumbersContainer {
+    width: 90%;
+    height: 80%;
+    margin: auto;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: center;
+}
+
+.smallNumber {
+    width: 11px;
+    height: 11px;
+    font-size: 11px;
+}

@@ -1,14 +1,18 @@
 import React from "react";
-import LevelData from "../levels.json";
+import InitialData from "../initialLevels.json";
+import CurrentData from "../levels.json";
 import Level from "./Level";
-import Numbers from "./Numbers";
+import Tools from "./Tools";
 
 class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      level: 0,
       currentCell: null,
-      levelArr: LevelData.ToSolve[0],
+      levelToSolve: InitialData.ToSolve[0],
+      levelSolved: InitialData.Solved[0],
+      levelArr: CurrentData.ToSolve[0],
       boxes: [
         [1, 2, 3, 10, 11, 12, 19, 20, 21],
         [4, 5, 6, 13, 14, 15, 22, 23, 24],
@@ -20,6 +24,8 @@ class App extends React.Component {
         [58, 59, 60, 67, 68, 69, 76, 77, 78],
         [61, 62, 63, 70, 71, 72, 79, 80, 81]
       ],
+      wrongCells: [],
+      correctCells: [],
       wrongRowCells: [],
       wrongColCells: [],
       wrongBoxCells: [],
@@ -27,12 +33,17 @@ class App extends React.Component {
       emptyClickColCells: [],
       emptyClickBoxCells: [],
       loadClickCells: [],
+      pencilSelected: false,
+      pencilNumbers: [],
     }
   }
 
   handleCellClick = (index, value) => {
     this.setState({
       currentCell: index,
+      wrongRowCells: [],
+      wrongColCells: [],
+      wrongBoxCells: [],
       emptyClickRowCells: [],
       emptyClickColCells: [],
       emptyClickBoxCells: [],
@@ -41,8 +52,60 @@ class App extends React.Component {
     this.emptyCellClickRow(index);
     this.emptyCellClickCol(index);
     this.emptyCellClickBox(index);
-    if (value !== null) {
+    if (value === 1 || value === 2 || value === 3 || value === 4 || value === 5 || value === 6 || value === 7 || value === 8 || value === 9) {
       this.loadCellClick(value);
+    }
+  }
+
+  handleNumberEnter = (value) => {
+    if (this.state.currentCell !== null) {
+      let indexX = Math.floor((this.state.currentCell - 1) / 9)
+      let indexY = (this.state.currentCell - 1) % 9;
+      if (!this.state.pencilSelected) {
+        let levelArrCopy = this.state.levelArr;
+        levelArrCopy[indexX][indexY] = value;
+        this.setState({
+          levelArr: levelArrCopy
+        });
+        this.correctCheck(value, indexX, indexY);
+        this.wrongCheck();
+        this.wrongRowCheck();
+        this.wrongColCheck();
+        this.wrongBoxCheck();
+        this.loadCellClick(value);
+      } else {
+        let isFound1 = false;
+        let pencilNumbersCopy = this.state.pencilNumbers;
+        for (let i = 0; i < pencilNumbersCopy.length; i++) {
+          if (pencilNumbersCopy[i].cell === this.state.currentCell && value !== 0) {
+            let isFound2 = false;
+            let numbersArray = pencilNumbersCopy[i].numbers;
+            isFound1 = true;
+            for (let j = 0; j < numbersArray.length; j++) {
+              if (numbersArray[j] === value) {
+                isFound2 = true;
+                numbersArray.splice(numbersArray.indexOf(value), 1);
+                this.setState({ pencilNumber: pencilNumbersCopy });
+              }
+            } if (!isFound2) {
+              pencilNumbersCopy[i].numbers.push(value);
+              this.setState({ pencilNumber: pencilNumbersCopy });
+            }
+          } else if (value === 0) {
+            isFound1 = true;
+            for (let j = 0; j < pencilNumbersCopy.length; j++) {
+              if (pencilNumbersCopy[j].cell === this.state.currentCell) {
+                pencilNumbersCopy[j].numbers = [];
+                this.setState({ pencilNumber: pencilNumbersCopy });
+              }
+            }
+          }
+        } if (!isFound1 && value !== 0) {
+          let data = { cell: this.state.currentCell, numbers: [value] }
+          pencilNumbersCopy.push(data);
+          this.setState({ pencilNumbers: pencilNumbersCopy });
+        }
+      }
     }
   }
 
@@ -85,29 +148,36 @@ class App extends React.Component {
   }
 
   loadCellClick = (value) => {
-    let loadClickCellsCopy = [];
-    for (let i = 0; i < 9; i++) {
-      for (let j = 0; j < 9; j++) {
-        if (this.state.levelArr[i][j] === value) {
-          loadClickCellsCopy.push((i * 9) + j + 1);
-          this.setState({
-            loadClickCells: loadClickCellsCopy
-          })
+    if (value === null || value === 0) {
+      this.setState({ loadClickCells: [] });
+    } else {
+      let loadClickCellsCopy = [];
+      for (let i = 0; i < 9; i++) {
+        for (let j = 0; j < 9; j++) {
+          if (this.state.levelArr[i][j] !== 0 && this.state.levelArr[i][j] === value) {
+            loadClickCellsCopy.push((i * 9) + j + 1);
+            this.setState({
+              loadClickCells: loadClickCellsCopy
+            })
+          }
         }
       }
     }
   }
 
-  handleNumberEnter = (numberValue) => {
-    let arrayIndex = [Math.floor((this.state.currentCell - 1) / 9), (this.state.currentCell - 1) % 9];
-    let levelArrCopy = this.state.levelArr;
-    levelArrCopy[arrayIndex[0]][arrayIndex[1]] = numberValue;
-    this.setState({
-      levelArr: levelArrCopy
-    });
-    this.wrongRowCheck();
-    this.wrongColCheck();
-    this.wrongBoxCheck();
+  wrongCheck = () => {
+    let wrongCellsCopy = [];
+    this.setState({ wrongCells: [] });
+    for (let i = 0; i < 9; i++) {
+      for (let j = 0; j < 9; j++) {
+        if (this.state.levelArr[i][j] !== 0 && this.state.levelArr[i][j] !== this.state.levelSolved[i][j]) {
+          wrongCellsCopy.push((i * 9) + j + 1);
+          this.setState({
+            wrongCells: wrongCellsCopy
+          })
+        }
+      }
+    }
   }
 
   wrongRowCheck = () => {
@@ -178,6 +248,18 @@ class App extends React.Component {
     }
   }
 
+  correctCheck = (value, indexX, indexY) => {
+    let correctCellsCopy = this.state.correctCells;
+    if (value !== 0 && value === this.state.levelSolved[indexX][indexY]) {
+      correctCellsCopy.push((indexX * 9) + indexY + 1);
+      this.setState({ correctCells: correctCellsCopy });
+    }
+  }
+
+  pencilToggle = () => {
+    this.setState({ pencilSelected: !this.state.pencilSelected });
+  }
+
   render() {
     return (
       <div>
@@ -189,13 +271,22 @@ class App extends React.Component {
           emptyClickColCells={this.state.emptyClickColCells}
           emptyClickBoxCells={this.state.emptyClickBoxCells}
           loadClickCells={this.state.loadClickCells}
+          wrongCells={this.state.wrongCells}
           wrongRowCells={this.state.wrongRowCells}
           wrongColCells={this.state.wrongColCells}
           wrongBoxCells={this.state.wrongBoxCells}
+          correctCells={this.state.correctCells}
+          pencilSelected={this.state.pencilSelected}
+          pencilNumbers={this.state.pencilNumbers}
         />
-
-        <Numbers
+        <Tools
+          currentCell={this.state.currentCell}
+          level={this.state.levelArr}
+          levelToSolve={this.state.levelToSolve}
+          levelSolved={this.state.levelSolved}
           onNumberEnter={this.handleNumberEnter}
+          pencilSelected={this.state.pencilSelected}
+          pencilToggle={this.pencilToggle}
         />
       </div>
     );
