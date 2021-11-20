@@ -35,12 +35,21 @@ class Tools extends React.Component {
         <div className="toolsContainer">
           <button
             className="btnTool"
+            disabled={this.props.isPaused || this.props.isFinished}
+            onClick={() => { this.props.onPause() }}
+          >
+            <i className="fas fa-pause fa-sm"></i>
+          </button>
+          <button
+            className="btnTool"
+            disabled={this.props.isPaused || this.props.isFinished}
             onClick={() => { this.checkFixedCell(0) }}
           >
             <i className="fas fa-eraser fa-sm"></i>
           </button>
           <button
             className={`btnTool ${this.checkPencilSelected()}`}
+            disabled={this.props.isPaused || this.props.isFinished}
             onClick={() => { this.props.pencilToggle() }}
           >
             <i className="fas fa-pencil-alt fa-sm"></i>
@@ -51,12 +60,18 @@ class Tools extends React.Component {
             return (
               <button
                 className="btnNumber"
+                disabled={this.props.isPaused || this.props.isFinished}
                 key={index}
                 onClick={() => { this.checkFixedCell(value) }}>
                 {value}
               </button>
             );
           })}
+        </div>
+        <div className="buttonsContainer">
+          <button className="btnChangeLevel" disabled={this.props.isPaused || this.props.isFinished} onClick={() => { this.props.onLevelChange("prev") }}>&lt;Prev</button>
+          <button className="btnRestart" disabled={this.props.isPaused || this.props.isFinished} onClick={() => { this.props.onRestart() }}>Restart Level</button>
+          <button className="btnChangeLevel" disabled={this.props.isPaused || this.props.isFinished} onClick={() => { this.props.onLevelChange("next") }}>Next&gt;</button>
         </div>
       </div>
     );

@@ -30,6 +30,7 @@ class InnerButtons extends React.Component {
     return (
       <button
         className={`btnInner btnInitial ${this.props.className}`}
+        disabled={this.props.isPaused || this.props.isFinished}
         onClick={() => { this.props.onCellClick(this.props.index, this.props.value) }}>
         <div className="smallNumbersContainer">
           {this.state.innerButtons.map((value, index) => {

@@ -6,7 +6,7 @@
 
 .smallNumbersContainer {
     width: 90%;
-    height: 80%;
+    height: 85%;
     margin: auto;
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -14,6 +14,7 @@
 }
 
 .smallNumber {
+    text-align: center;
     width: 11px;
     height: 11px;
     font-size: 11px;

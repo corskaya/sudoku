@@ -39,7 +39,7 @@ class Level extends React.Component {
     if (this.props.loadClickCells.length > 0) {
       for (let i = 0; i < this.props.loadClickCells.length; i++) {
         if (this.props.loadClickCells[i] === (col * 9) + row + 1) {
-          return "sameValue"
+          return "sameValue border"
         }
       }
     }
@@ -128,6 +128,8 @@ class Level extends React.Component {
                     index={(indexCol * 9) + indexRow + 1}
                     onCellClick={this.props.onCellClick}
                     pencilNumbers={this.props.pencilNumbers}
+                    isPaused={this.props.isPaused}
+                    isFinished={this.props.isFinished}
                     /> :
                   <OuterButton
                     className=
@@ -146,6 +148,8 @@ class Level extends React.Component {
                     index={(indexCol * 9) + indexRow + 1}
                     onCellClick={this.props.onCellClick}
                     value={valueCol}
+                    isPaused={this.props.isPaused}
+                    isFinished={this.props.isFinished}
                   />
               );
             })

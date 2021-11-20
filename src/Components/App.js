@@ -1,18 +1,43 @@
 import React from "react";
-import InitialData from "../initialLevels.json";
-import CurrentData from "../levels.json";
+import "./App.css";
+import LevelData from "../levels.json";
+import Info from "./Info";
 import Level from "./Level";
 import Tools from "./Tools";
+import Pause from "./Pause";
+import Warning from "./Warning";
+import MistakeOver from "./MistakeOver";
+
+let levelsArr = [];
+
+for (let i = 0; i < LevelData.ToSolve.length; i++) {
+  let levelArr = [];
+  for (let j = 0; j < 9; j++) {
+    levelArr.push(LevelData.ToSolve[i][j].slice());
+  }
+  levelsArr.push(levelArr.slice());
+}
+
+let levelsToSolve = [];
+
+for (let i = 0; i < LevelData.ToSolve.length; i++) {
+  let levelArr = [];
+  for (let j = 0; j < 9; j++) {
+    levelArr.push(LevelData.ToSolve[i][j].slice());
+  }
+  levelsToSolve.push(levelArr.slice());
+}
 
 class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      level: 0,
+      level: 1,
+      mistakes: 0,
       currentCell: null,
-      levelToSolve: InitialData.ToSolve[0],
-      levelSolved: InitialData.Solved[0],
-      levelArr: CurrentData.ToSolve[0],
+      levelToSolve: levelsToSolve[0],
+      levelArr: levelsArr[0],
+      levelSolved: LevelData.Solved[0],
       boxes: [
         [1, 2, 3, 10, 11, 12, 19, 20, 21],
         [4, 5, 6, 13, 14, 15, 22, 23, 24],
@@ -35,11 +60,40 @@ class App extends React.Component {
       loadClickCells: [],
       pencilSelected: false,
       pencilNumbers: [],
+      showWarning: false,
+      levelChange: null,
+      time: 0,
+      isPaused: false,
+      isFinished: false,
     }
   }
+  
+  getLevelArr = () => {
+    levelsArr = [];
+    for (let i = 0; i < LevelData.ToSolve.length; i++) {
+      let levelArr = [];
+      for (let j = 0; j < 9; j++) {
+        levelArr.push(LevelData.ToSolve[i][j].slice());
+      }
+      levelsArr.push(levelArr.slice());
+    }
+    return levelsArr;
+  }
 
-  handleCellClick = (index, value) => {
-    this.setState({
+  getLevelToSolve = () => {
+    levelsToSolve = [];
+    for (let i = 0; i < LevelData.ToSolve.length; i++) {
+      let levelArr = [];
+      for (let j = 0; j < 9; j++) {
+        levelArr.push(LevelData.ToSolve[i][j].slice());
+      }
+      levelsToSolve.push(levelArr.slice());
+    }
+    return levelsToSolve;
+  }
+
+  handleCellClick = async (index, value) => {
+    await this.setState({
       currentCell: index,
       wrongRowCells: [],
       wrongColCells: [],
@@ -59,7 +113,7 @@ class App extends React.Component {
 
   handleNumberEnter = (value) => {
     if (this.state.currentCell !== null) {
-      let indexX = Math.floor((this.state.currentCell - 1) / 9)
+      let indexX = Math.floor((this.state.currentCell - 1) / 9);
       let indexY = (this.state.currentCell - 1) % 9;
       if (!this.state.pencilSelected) {
         let levelArrCopy = this.state.levelArr;
@@ -69,9 +123,10 @@ class App extends React.Component {
         });
         this.correctCheck(value, indexX, indexY);
         this.wrongCheck();
-        this.wrongRowCheck();
-        this.wrongColCheck();
-        this.wrongBoxCheck();
+        this.mistakeCheck(value);
+        this.wrongRowCheck(value);
+        this.wrongColCheck(value);
+        this.wrongBoxCheck(value);
         this.loadCellClick(value);
       } else {
         let isFound1 = false;
@@ -162,6 +217,9 @@ class App extends React.Component {
           }
         }
       }
+      this.wrongRowCheck(value);
+      this.wrongColCheck(value);
+      this.wrongBoxCheck(value);
     }
   }
 
@@ -180,20 +238,33 @@ class App extends React.Component {
     }
   }
 
-  wrongRowCheck = () => {
+  mistakeCheck = async (value) => {
+    let indexX = Math.floor((this.state.currentCell - 1) / 9);
+    let indexY = (this.state.currentCell - 1) % 9;
+    if (value !== 0 && this.state.levelSolved[indexX][indexY] !== value) {
+      await this.setState((state) => ({
+        mistakes: state.mistakes + 1
+      }));
+    }
+    if (this.state.mistakes >= 3) {
+      clearInterval(this.timerID);
+      this.setState({
+        isFinished: true
+      })
+    }
+  }
+
+  wrongRowCheck = (value) => {
     let isFound = false;
+    let indexX = Math.floor((this.state.currentCell - 1) / 9);
     let wrongRowCellsCopy = [];
     for (let i = 0; i < 9; i++) {
-      for (let j = 0; j < 8; j++) {
-        for (let k = j + 1; k < 9; k++) {
-          if (this.state.levelArr[i][j] !== 0 && this.state.levelArr[i][j] === this.state.levelArr[i][k]) {
-            isFound = true;
-            wrongRowCellsCopy.push((i * 9) + j + 1, (i * 9) + k + 1);
-            this.setState({
-              wrongRowCells: wrongRowCellsCopy
-            })
-          }
-        }
+      if (this.state.levelArr[indexX][i] !== 0 && this.state.levelArr[indexX][i] === value) {
+        isFound = true;
+        wrongRowCellsCopy.push((indexX * 9) + i + 1);
+        this.setState({
+          wrongRowCells: wrongRowCellsCopy
+        })
       }
     } if (!isFound) {
       this.setState({
@@ -202,20 +273,17 @@ class App extends React.Component {
     }
   }
 
-  wrongColCheck = () => {
+  wrongColCheck = (value) => {
     let isFound = false;
+    let indexY = (this.state.currentCell - 1) % 9;
     let wrongColCellsCopy = [];
     for (let i = 0; i < 9; i++) {
-      for (let j = 0; j < 8; j++) {
-        for (let k = j + 1; k < 9; k++) {
-          if (this.state.levelArr[j][i] !== 0 && this.state.levelArr[j][i] === this.state.levelArr[k][i]) {
-            isFound = true;
-            wrongColCellsCopy.push((j * 9) + i + 1, (k * 9) + i + 1);
-            this.setState({
-              wrongColCells: wrongColCellsCopy
-            })
-          }
-        }
+      if (this.state.levelArr[i][indexY] !== 0 && this.state.levelArr[i][indexY] === value) {
+        isFound = true;
+        wrongColCellsCopy.push((i * 9) + indexY + 1);
+        this.setState({
+          wrongColCells: wrongColCellsCopy
+        })
       }
     } if (!isFound) {
       this.setState({
@@ -224,20 +292,21 @@ class App extends React.Component {
     }
   }
 
-  wrongBoxCheck = () => {
+  wrongBoxCheck = (value) => {
     let isFound = false;
     let wrongBoxCellsCopy = [];
     for (let i = 0; i < 9; i++) {
-      for (let j = 0; j < 8; j++) {
-        for (let k = j + 1; k < 9; k++) {
-          let value1 = this.state.levelArr[Math.floor((this.state.boxes[i][j] - 1) / 9)][(this.state.boxes[i][j] - 1) % 9];
-          let value2 = this.state.levelArr[Math.floor((this.state.boxes[i][k] - 1) / 9)][(this.state.boxes[i][k] - 1) % 9];
-          if (value1 !== 0 && value1 === value2) {
-            isFound = true;
-            wrongBoxCellsCopy.push(this.state.boxes[i][j], this.state.boxes[i][k]);
-            this.setState({
-              wrongBoxCells: wrongBoxCellsCopy
-            })
+      for (let j = 0; j < 9; j++) {
+        if (this.state.boxes[i][j] === this.state.currentCell) {
+          for (let k = 0; k < 9; k++) {
+            let value2 = this.state.levelArr[Math.floor((this.state.boxes[i][k] - 1) / 9)][(this.state.boxes[i][k] - 1) % 9];
+            if (value2 !== 0 && value2 === value) {
+              isFound = true;
+              wrongBoxCellsCopy.push(this.state.boxes[i][k]);
+              this.setState({
+                wrongBoxCells: wrongBoxCellsCopy
+              })
+            }
           }
         }
       }
@@ -260,9 +329,203 @@ class App extends React.Component {
     this.setState({ pencilSelected: !this.state.pencilSelected });
   }
 
+  componentDidMount() {
+    this.timerID = setInterval(() => this.time(), 1000);
+  }
+
+  time() {
+    this.setState({ time: this.state.time + 1 });
+  }
+
+  handleRestart = () => {
+    clearInterval(this.timerID);
+    let initialLevelArr = this.getLevelArr();
+    let initialLevelToSolve = this.getLevelToSolve();
+    this.setState({
+      currentCell: null,
+      mistakes: 0,
+      levelToSolve: initialLevelToSolve[this.state.level - 1],
+      levelArr: initialLevelArr[this.state.level - 1],
+      levelSolved: LevelData.Solved[this.state.level - 1],
+      wrongCells: [],
+      correctCells: [],
+      wrongRowCells: [],
+      wrongColCells: [],
+      wrongBoxCells: [],
+      emptyClickRowCells: [],
+      emptyClickColCells: [],
+      emptyClickBoxCells: [],
+      loadClickCells: [],
+      pencilSelected: false,
+      pencilNumbers: [],
+      showWarning: null,
+      time: 0,
+      isPaused: false,
+      isFinished: false,
+    });
+    this.timerID = setInterval(() => this.time(), 1000);
+  }
+
+  handleLevelChange = (change) => {
+    this.setState({ showWarning: false });
+    if (change === "prev" && this.state.level > 1) {
+      clearInterval(this.timerID);
+      this.handlePrevious();
+      this.setState({ levelChange: "prev" });
+    } if (change === "next" && this.state.level < 27) {
+      clearInterval(this.timerID);
+      this.handleNext();
+      this.setState({ levelChange: "next" });
+    }
+  }
+
+  handlePrevious = () => {
+    let initialLevelArr = this.getLevelArr();
+    let initialLevelToSolve = this.getLevelToSolve();
+    if (this.state.level > 1) {
+      if (this.state.levelArr.toString() !== this.state.levelToSolve.toString()) {
+        this.setState({ showWarning: true, isPaused: true });
+      } else {
+        clearInterval(this.timerID);
+        this.setState({
+          currentCell: null,
+          level: this.state.level - 1,
+          mistakes: 0,
+          levelToSolve: initialLevelToSolve[this.state.level - 2],
+          levelArr: initialLevelArr[this.state.level - 2],
+          levelSolved: LevelData.Solved[this.state.level - 2],
+          wrongCells: [],
+          correctCells: [],
+          wrongRowCells: [],
+          wrongColCells: [],
+          wrongBoxCells: [],
+          emptyClickRowCells: [],
+          emptyClickColCells: [],
+          emptyClickBoxCells: [],
+          loadClickCells: [],
+          pencilSelected: false,
+          pencilNumbers: [],
+          showWarning: null,
+          time: 0,
+        });
+      this.timerID = setInterval(() => this.time(), 1000);
+      }
+    }
+  }
+
+  handleNext = () => {
+    let initialLevelArr = this.getLevelArr();
+    let initialLevelToSolve = this.getLevelToSolve();
+    if (this.state.level < 27) {
+      if (this.state.levelArr.toString() !== this.state.levelToSolve.toString()) {
+        this.setState({ showWarning: true, isPaused: true });
+      } else {
+        clearInterval(this.timerID);
+        this.setState({
+          currentCell: null,
+          level: this.state.level + 1,
+          mistakes: 0,
+          levelToSolve: initialLevelToSolve[this.state.level],
+          levelArr: initialLevelArr[this.state.level],
+          levelSolved: LevelData.Solved[this.state.level],
+          wrongCells: [],
+          correctCells: [],
+          wrongRowCells: [],
+          wrongColCells: [],
+          wrongBoxCells: [],
+          emptyClickRowCells: [],
+          emptyClickColCells: [],
+          emptyClickBoxCells: [],
+          loadClickCells: [],
+          pencilSelected: false,
+          pencilNumbers: [],
+          showWarning: null,
+          time: 0,
+        });
+        this.timerID = setInterval(() => this.time(), 1000);
+      }
+    }
+  }
+
+  handlePause = () => {
+    clearInterval(this.timerID);
+    this.setState({
+      isPaused: true,
+      showPause: true,
+    })
+  }
+
+  handleResume = () => {
+    this.setState({ isPaused: false, showPause: false });
+    this.timerID = setInterval(() => this.time(), 1000);
+  }
+
+  handleWarning = (choice, change) => {
+    clearInterval(this.timerID);
+    let initialLevelArr = this.getLevelArr();
+    let initialLevelToSolve = this.getLevelToSolve();
+    if (choice && change === "prev") {
+      this.setState({
+        currentCell: null,
+        level: this.state.level - 1,
+        mistakes: 0,
+        levelToSolve: initialLevelToSolve[this.state.level - 2],
+        levelArr: initialLevelArr[this.state.level - 2],
+        levelSolved: LevelData.Solved[this.state.level - 2],
+        wrongCells: [],
+        correctCells: [],
+        wrongRowCells: [],
+        wrongColCells: [],
+        wrongBoxCells: [],
+        emptyClickRowCells: [],
+        emptyClickColCells: [],
+        emptyClickBoxCells: [],
+        loadClickCells: [],
+        pencilSelected: false,
+        pencilNumbers: [],
+        showWarning: null,
+        time: 0,
+        isPaused: false,
+      });
+      this.timerID = setInterval(() => this.time(), 1000);
+    } else if (choice && change === "next") {
+      this.setState({
+        currentCell: null,
+        level: this.state.level + 1,
+        mistakes: 0,
+        levelToSolve: initialLevelToSolve[this.state.level],
+        levelArr: initialLevelArr[this.state.level],
+        levelSolved: LevelData.Solved[this.state.level],
+        wrongCells: [],
+        correctCells: [],
+        wrongRowCells: [],
+        wrongColCells: [],
+        wrongBoxCells: [],
+        emptyClickRowCells: [],
+        emptyClickColCells: [],
+        emptyClickBoxCells: [],
+        loadClickCells: [],
+        pencilSelected: false,
+        pencilNumbers: [],
+        showWarning: null,
+        time: 0,
+        isPaused: false,
+      });
+      this.timerID = setInterval(() => this.time(), 1000);
+    } else {
+      this.setState({ showWarning: null, isPaused: false });
+      this.timerID = setInterval(() => this.time(), 1000);
+    }
+  }
+
   render() {
     return (
-      <div>
+      <div className="appContainer">
+        <Info
+          level={this.state.level}
+          mistakes={this.state.mistakes}
+          time={this.state.time}
+        />
         <Level
           currentCell={this.state.currentCell}
           level={this.state.levelArr}
@@ -278,6 +541,8 @@ class App extends React.Component {
           correctCells={this.state.correctCells}
           pencilSelected={this.state.pencilSelected}
           pencilNumbers={this.state.pencilNumbers}
+          isPaused={this.state.isPaused}
+          isFinished={this.state.isFinished}
         />
         <Tools
           currentCell={this.state.currentCell}
@@ -287,7 +552,28 @@ class App extends React.Component {
           onNumberEnter={this.handleNumberEnter}
           pencilSelected={this.state.pencilSelected}
           pencilToggle={this.pencilToggle}
+          onRestart={this.handleRestart}
+          onLevelChange={this.handleLevelChange}
+          isPaused={this.state.isPaused}
+          onPause={this.handlePause}
+          isFinished={this.state.isFinished}
         />
+        {this.state.showPause ? 
+          <Pause
+            onResume={this.handleResume}
+          />
+          : null}
+        {this.state.showWarning ?
+          <Warning
+            onWarning={this.handleWarning}
+            change={this.state.levelChange}
+          />
+          : null}
+        {this.state.mistakes >= 3 ?
+          <MistakeOver
+            onRestart={this.handleRestart}
+          />
+          : null}
       </div>
     );
   }

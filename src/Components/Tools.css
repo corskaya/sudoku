@@ -1,16 +1,14 @@
 .numbersContainer {
     width: 30%;
-    margin: 0 auto;
-    margin-top: 15px;
+    margin: 15px auto 0;
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
 .toolsContainer {
-    width: 10%;
-    margin: 0 auto;
-    margin-top: 15px;
+    width: 15%;
+    margin: 15px auto 0;
     display: flex;
     justify-content: space-around;
     align-items: center;
@@ -56,4 +54,33 @@
 .toolSelected:hover {
     background-color: white;
     color: rgb(53, 53, 53);
+}
+
+.buttonsContainer{
+    width: 30%;
+    margin: 15px auto 0;
+    display: flex;
+    justify-content: space-between;
+}
+
+.btnChangeLevel {
+    cursor: pointer;
+    border: 0;
+    font-size: 17px;
+    background-color: transparent;
+    margin: auto 0;
+}
+
+.btnRestart {
+    cursor: pointer;
+    padding: 10px 30px;
+    background-color: rgb(53, 53, 53);
+    color: white;
+    border: 2px solid black;
+    border-radius: 3px;
+    font-size: 17px;
+}
+
+.btnRestart:hover {
+    background-color: #000;
 }

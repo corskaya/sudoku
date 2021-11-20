@@ -1,6 +1,6 @@
 .levelContainer {
     width: 30%;
-    margin: 0 auto;
+    margin: 1px auto 0;
     display: grid;
     grid-template-columns: repeat(9, minmax(0, 1fr));
     border: 3px solid var(--dark-color-a);
