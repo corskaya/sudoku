@@ -7,6 +7,7 @@ import Tools from "./Tools";
 import Pause from "./Pause";
 import Warning from "./Warning";
 import MistakeOver from "./MistakeOver";
+import LevelCompleted from "./LevelCompleted";
 
 let levelsArr = [];
 
@@ -65,6 +66,9 @@ class App extends React.Component {
       time: 0,
       isPaused: false,
       isFinished: false,
+      isCompleted: false,
+      showCompleted: false,
+      completedLevels: [],
     }
   }
   
@@ -322,6 +326,12 @@ class App extends React.Component {
     if (value !== 0 && value === this.state.levelSolved[indexX][indexY]) {
       correctCellsCopy.push((indexX * 9) + indexY + 1);
       this.setState({ correctCells: correctCellsCopy });
+      if (this.state.levelArr.toString() === this.state.levelSolved.toString()) {
+        clearInterval(this.timerID);
+        let completedLevelsCopy = this.state.completedLevels;
+        completedLevelsCopy.push(this.state.level);
+        this.setState({ showCompleted: true, isFinished: true, completedLevels: completedLevelsCopy });
+      }
     }
   }
 
@@ -383,9 +393,18 @@ class App extends React.Component {
     let initialLevelArr = this.getLevelArr();
     let initialLevelToSolve = this.getLevelToSolve();
     if (this.state.level > 1) {
-      if (this.state.levelArr.toString() !== this.state.levelToSolve.toString()) {
+      if (this.state.levelArr.toString() !== this.state.levelToSolve.toString() && this.state.levelArr.toString() !== this.state.levelSolved.toString()) {
         this.setState({ showWarning: true, isPaused: true });
       } else {
+        let isFound = false;
+        for (let i = 0; i < this.state.completedLevels.length; i++) {
+          if (this.state.completedLevels[i] === this.state.level - 1) {
+            isFound = true;
+            this.setState({ isCompleted: true, showCompleted: true });
+          }
+        } if (!isFound) {
+          this.setState({ isCompleted: false, showCompleted: false });
+        }
         clearInterval(this.timerID);
         this.setState({
           currentCell: null,
@@ -407,8 +426,11 @@ class App extends React.Component {
           pencilNumbers: [],
           showWarning: null,
           time: 0,
+          showCompleted: false,
         });
-      this.timerID = setInterval(() => this.time(), 1000);
+        if (!isFound) {
+          this.timerID = setInterval(() => this.time(), 1000);
+        }
       }
     }
   }
@@ -417,9 +439,18 @@ class App extends React.Component {
     let initialLevelArr = this.getLevelArr();
     let initialLevelToSolve = this.getLevelToSolve();
     if (this.state.level < 27) {
-      if (this.state.levelArr.toString() !== this.state.levelToSolve.toString()) {
+      if (this.state.levelArr.toString() !== this.state.levelToSolve.toString() && this.state.levelArr.toString() !== this.state.levelSolved.toString()) {
         this.setState({ showWarning: true, isPaused: true });
       } else {
+        let isFound = false;
+        for (let i = 0; i < this.state.completedLevels.length; i++) {
+          if (this.state.completedLevels[i] === this.state.level + 1) {
+            isFound = true;
+            this.setState({ isCompleted: true, showCompleted: true  });
+          }
+        } if (!isFound) {
+          this.setState({ isCompleted: false, showCompleted: false });
+        }
         clearInterval(this.timerID);
         this.setState({
           currentCell: null,
@@ -441,8 +472,11 @@ class App extends React.Component {
           pencilNumbers: [],
           showWarning: null,
           time: 0,
+          showCompleted: false,
         });
-        this.timerID = setInterval(() => this.time(), 1000);
+        if (!isFound) {
+          this.timerID = setInterval(() => this.time(), 1000);
+        }
       }
     }
   }
@@ -465,6 +499,15 @@ class App extends React.Component {
     let initialLevelArr = this.getLevelArr();
     let initialLevelToSolve = this.getLevelToSolve();
     if (choice && change === "prev") {
+      let isFound = false;
+      for (let i = 0; i < this.state.completedLevels.length; i++) {
+        if (this.state.completedLevels[i] === this.state.level - 1) {
+          isFound = true;
+          this.setState({ isCompleted: true, showCompleted: true });
+        }
+      } if (!isFound) {
+        this.setState({ isCompleted: false, showCompleted: false });
+      }
       this.setState({
         currentCell: null,
         level: this.state.level - 1,
@@ -486,9 +529,21 @@ class App extends React.Component {
         showWarning: null,
         time: 0,
         isPaused: false,
+        showCompleted: false,
       });
-      this.timerID = setInterval(() => this.time(), 1000);
+      if (!isFound) {
+        this.timerID = setInterval(() => this.time(), 1000);
+      }
     } else if (choice && change === "next") {
+      let isFound = false;
+      for (let i = 0; i < this.state.completedLevels.length; i++) {
+        if (this.state.completedLevels[i] === this.state.level + 1) {
+          isFound = true;
+          this.setState({ isCompleted: true, showCompleted: true });
+        }
+      } if (!isFound) {
+        this.setState({ isCompleted: false, showCompleted: false });
+      }
       this.setState({
         currentCell: null,
         level: this.state.level + 1,
@@ -510,11 +565,59 @@ class App extends React.Component {
         showWarning: null,
         time: 0,
         isPaused: false,
+        showCompleted: false,
       });
-      this.timerID = setInterval(() => this.time(), 1000);
+      if (!isFound) {
+        this.timerID = setInterval(() => this.time(), 1000);
+      }
     } else {
       this.setState({ showWarning: null, isPaused: false });
       this.timerID = setInterval(() => this.time(), 1000);
+    }
+  }
+
+  handleContinue = () => {
+    if (this.state.level < 27) {
+      let initialLevelArr = this.getLevelArr();
+      let initialLevelToSolve = this.getLevelToSolve();
+      let isFound = false;
+      for (let i = 0; i < this.state.completedLevels.length; i++) {
+        if (this.state.completedLevels[i] === this.state.level + 1) {
+          isFound = true;
+          this.setState({ isCompleted: true, showCompleted: true });
+        }
+      } if (!isFound) {
+        this.setState({ isCompleted: false, showCompleted: false });
+      }
+        clearInterval(this.timerID);
+        this.setState({
+          currentCell: null,
+          level: this.state.level + 1,
+          mistakes: 0,
+          levelToSolve: initialLevelToSolve[this.state.level],
+          levelArr: initialLevelArr[this.state.level],
+          levelSolved: LevelData.Solved[this.state.level],
+          wrongCells: [],
+          correctCells: [],
+          wrongRowCells: [],
+          wrongColCells: [],
+          wrongBoxCells: [],
+          emptyClickRowCells: [],
+          emptyClickColCells: [],
+          emptyClickBoxCells: [],
+          loadClickCells: [],
+          pencilSelected: false,
+          pencilNumbers: [],
+          showWarning: null,
+          time: 0,
+          showCompleted: false,
+          isFinished: false,
+        });
+      if (!isFound) {
+        this.timerID = setInterval(() => this.time(), 1000);
+      }
+    } else {
+      this.setState({ showCompleted: false, isCompleted: true, isFinished: false });
     }
   }
 
@@ -528,7 +631,9 @@ class App extends React.Component {
         />
         <Level
           currentCell={this.state.currentCell}
-          level={this.state.levelArr}
+          level={this.state.level}
+          levelArr={this.state.levelArr}
+          levelSolved={this.state.levelSolved}
           onCellClick={this.handleCellClick}
           emptyClickRowCells={this.state.emptyClickRowCells}
           emptyClickColCells={this.state.emptyClickColCells}
@@ -543,10 +648,11 @@ class App extends React.Component {
           pencilNumbers={this.state.pencilNumbers}
           isPaused={this.state.isPaused}
           isFinished={this.state.isFinished}
+          completedLevels={this.state.completedLevels}
         />
         <Tools
           currentCell={this.state.currentCell}
-          level={this.state.levelArr}
+          levelArr={this.state.levelArr}
           levelToSolve={this.state.levelToSolve}
           levelSolved={this.state.levelSolved}
           onNumberEnter={this.handleNumberEnter}
@@ -557,6 +663,7 @@ class App extends React.Component {
           isPaused={this.state.isPaused}
           onPause={this.handlePause}
           isFinished={this.state.isFinished}
+          isCompleted={this.state.isCompleted}
         />
         {this.state.showPause ? 
           <Pause
@@ -572,6 +679,14 @@ class App extends React.Component {
         {this.state.mistakes >= 3 ?
           <MistakeOver
             onRestart={this.handleRestart}
+          />
+          : null}
+        {this.state.showCompleted || this.state.isCompleted ?
+          <LevelCompleted
+            onContinue={this.handleContinue}
+            time={this.state.time}
+            mistakes={this.state.mistakes}
+            isCompleted={this.state.isCompleted}
           />
           : null}
       </div>

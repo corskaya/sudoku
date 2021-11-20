@@ -103,10 +103,23 @@ class Level extends React.Component {
     }
   }
 
+  getLevel = (arr, level) => {
+    let isFound = false;
+    for (let i = 0; i < arr.length; i++) {
+      if (arr[i] === level) {
+        isFound = true;
+        return this.props.levelSolved;
+      }
+    }
+    if (!isFound) {
+      return this.props.levelArr;
+    }
+  }
+
   render() {
     return (
       <div className="levelContainer">
-        {this.props.level.map((valueRow, indexCol) => {
+        {this.getLevel(this.props.completedLevels, this.props.level).map((valueRow, indexCol) => {
           return (
             valueRow.map((valueCol, indexRow) => {
               return (
